@@ -1,8 +1,8 @@
 <template>
   <b-container class="py-3" v-if="schema">
-    <small>
+    <!-- <small>
       <b-breadcrumb :items="breadcrumbs" class="p-0"/>
-    </small>
+    </small> -->
     <div class="bg-white rounded p-3 mb-3">
       <h3>{{ schema.__label || modelName }}</h3>
     </div>
@@ -28,24 +28,24 @@ export default {
     DataTable
   },
   computed: {
-    ...mapState(['schemas']),
+    ...mapState(['agent']),
     schema(){
-      return (this.schemas || {})[this.modelName] || null;
+      return (this.agent.models || {})[this.modelName] || null;
     },
 
-    breadcrumbs(){
-      if (!this.agent)
-        return [];
+    // breadcrumbs(){
+    //   if (!this.agent)
+    //     return [];
 
-      return [
-        {
-          text: this.agent.name
-        },
-        {
-          text: this.modelName,
-        }
-      ]
-    }
+    //   return [
+    //     {
+    //       text: this.agent._id
+    //     },
+    //     {
+    //       text: this.modelName,
+    //     }
+    //   ]
+    // }
   },
   data(){
     return {

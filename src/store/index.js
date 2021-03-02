@@ -9,11 +9,11 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: () => ({
-    schemas: [],
+    agent: {},
   }),
   mutations: {
-    setSchemas(state, value){
-      state.schemas = value;
+    setAgent(state, value){
+      state.agent = value;
     },
   },
   actions: {

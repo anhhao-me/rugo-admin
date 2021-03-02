@@ -10,7 +10,7 @@
       <div class="sideBarHeader p-4">
         <img src="@/assets/images/logo-text.png" alt="" class="w-100">
       </div>
-      <router-link class="item d-flex" :to="`/private/models/${name}`" v-for="(schema, name) in schemas" :key="`schema-${name}`">
+      <router-link class="item d-flex" :to="`/private/models/${name}`" v-for="(schema, name) in agent.models" :key="`schema-${name}`">
         <div class="icon"><i :class="`icon-${ schema.__icon || 'doc'}`"></i></div>
         <div class="label">{{ schema.__label || name }}</div>
       </router-link>
@@ -32,18 +32,21 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 export default {
   computed: {
     ...mapState('api', ['token']),
-    ...mapState(['schemas']),
+    ...mapState(['agent']),
   },
   methods: {
-    ...mapMutations(['setSchemas']),
+    ...mapMutations(['setAgent']),
     ...mapActions('auth', ['logout', 'sync']),
+    ...mapMutations('notice', {
+      pushNotice: 'push'
+    }),
     async doLogout(){
       await this.logout();
       this.$router.push('/login')
     },
 
     async syncInfo(){
-      this.setSchemas((await this.sync()).schemas);
+      this.setAgent((await this.sync()).agent);
     }
   },
   mounted(){

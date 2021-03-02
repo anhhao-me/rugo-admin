@@ -23,7 +23,7 @@ export default {
     },
 
     async sync({ dispatch }){
-      const info = await dispatch('api/doGet', ['/me'], { root: true });
+      const info = await dispatch('api/doGet', ['/'], { root: true });
       return info;
     }
   }
