@@ -46,7 +46,12 @@ export default {
     },
 
     async syncInfo(){
-      this.setAgent((await this.sync()).agent);
+      const res = await this.sync();
+      if (!res || !res.agent){
+        this.$router.push('/login');
+        return;
+      }
+      this.setAgent(res.agent);
     }
   },
   mounted(){
