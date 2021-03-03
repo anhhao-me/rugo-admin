@@ -21,22 +21,19 @@
       v-if="schema"
       size="xl"
     >
-      <b-row class="px-2">
-        <b-col :cols="['richtext'].indexOf(getViewType(field)) === -1 ? '6' : '12'" v-for="(field, name) in viewSchema" :key="`field-${name}`" class="px-2">
-          <b-form-group :label="name">
-            <!-- TEXT -->
-            <b-form-input 
-              v-if="getViewType(field) === 'shorttext'" 
-              :type="field.type.toLowerCase()" 
-              v-model="dataForm[name]"
-            />
-            <!-- END TEXT -->
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-form-group>
-        <b-button @click="doHandleDataForm" variant="primary">{{ mode === 'create'? 'Tạo' : 'Sửa' }}</b-button>
-      </b-form-group>
+      <b-form @submit.prevent="doHandleDataForm">
+        <b-row class="px-2">
+          <b-col :cols="['richtext'].indexOf(getViewType(field)) === -1 ? '6' : '12'" v-for="(field, name) in viewSchema" :key="`field-${name}`" class="px-2">
+            <b-form-group :label="name">
+              <component v-bind:is="`${field.type}field`" v-model="dataForm[name]"/>
+            </b-form-group>
+          </b-col>
+        </b-row>
+      
+        <b-form-group>
+          <b-button type="submit" variant="primary">{{ mode === 'create'? 'Tạo' : 'Sửa' }}</b-button>
+        </b-form-group>
+      </b-form>
     </b-modal>
     <!-- END CREATE FORM MODAL -->
 
@@ -70,7 +67,7 @@
         </template>
 
         <template #cell()="data">
-          {{ data.value }}
+          <component v-bind:is="`${viewSchema[data.field.key].type}field`" v-model="data.value" mode="preview"/>
         </template>
 
         <!-- Addition cols -->
@@ -110,8 +107,17 @@
 <script>
 import { mapActions, mapState } from 'vuex'
 
+const FieldTypes = {};
+const req = require.context('./fields', true, /\.vue$/i)
+req.keys()
+.forEach(key => {
+  const name = key.match(/\w+/)[0];
+  FieldTypes[`${name}Field`.toLowerCase()] = req(key).default;
+});
+
 export default {
   components: {
+    ...FieldTypes
   },
   props: [
     'schema',
@@ -183,15 +189,18 @@ export default {
         key: '__select',
         label: ''
       }];
-      for (let key in this.viewSchema)
+      for (let key in this.viewSchema){
+        const fieldType = FieldTypes[`${this.viewSchema[key].type.toLowerCase()}field`];
         if (
-          ['text'].indexOf(this.viewSchema[key].type.toLowerCase()) !== -1
+          fieldType.allowModes && fieldType.allowModes.indexOf('preview') !== -1
           && !this.viewSchema[key].hidePreview
         )
           fields.push({
             key,
             label: key
           });
+      }
+          
       fields.push({
         key: '__tools',
         label: ''
@@ -233,8 +242,7 @@ export default {
         }
 
         if (
-          this.viewSchema[key] && 
-          ['text', 'email', 'password'].indexOf(this.viewSchema[key].type.toLowerCase()) !== -1
+          this.viewSchema[key]
           && this.originForm[key] === this.dataForm[key]
         ){
           delete this.dataForm[key];
