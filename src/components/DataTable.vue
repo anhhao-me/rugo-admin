@@ -23,9 +23,13 @@
     >
       <b-form @submit.prevent="doHandleDataForm">
         <b-row class="px-2">
-          <b-col :cols="['richtext'].indexOf(getViewType(field)) === -1 ? '6' : '12'" v-for="(field, name) in viewSchema" :key="`field-${name}`" class="px-2">
+          <b-col :cols="allFieldTypes[`${field.type}field`.toLowerCase()].expanded ? 12 : 6" v-for="(field, name) in viewSchema" :key="`field-${name}`" class="px-2">
             <b-form-group :label="name">
-              <component v-bind:is="`${field.type}field`" v-model="dataForm[name]"/>
+              <component 
+                v-bind:is="`${field.type}field`.toLowerCase()" 
+                v-model="dataForm[name]"
+                :schema="field"
+              />
             </b-form-group>
           </b-col>
         </b-row>
@@ -67,7 +71,7 @@
         </template>
 
         <template #cell()="data">
-          <component v-bind:is="`${viewSchema[data.field.key].type}field`" v-model="data.value" mode="preview"/>
+          <component v-bind:is="`${viewSchema[data.field.key].type}field`.toLowerCase()" v-model="data.value" mode="preview"/>
         </template>
 
         <!-- Addition cols -->
@@ -105,6 +109,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import { mapActions, mapState } from 'vuex'
 
 const FieldTypes = {};
@@ -164,7 +169,8 @@ export default {
           }
         }
       },
-      preload: {}
+      preload: {},
+      allFieldTypes: Object.assign({}, this.$options.components, Vue.options.components)
     }
   },
   computed: {
@@ -189,8 +195,9 @@ export default {
         key: '__select',
         label: ''
       }];
+
       for (let key in this.viewSchema){
-        const fieldType = FieldTypes[`${this.viewSchema[key].type.toLowerCase()}field`];
+        const fieldType = this.allFieldTypes[`${this.viewSchema[key].type.toLowerCase()}field`];
         if (
           fieldType.allowModes && fieldType.allowModes.indexOf('preview') !== -1
           && !this.viewSchema[key].hidePreview
@@ -293,7 +300,6 @@ export default {
     },
 
     updateDataForm(field, value){
-      console.log('Change');
       this.dataForm[field] = value;
     },
 
