@@ -5,7 +5,8 @@ import store from './store'
 
 import './plugins/bootstrap-vue'
 
-Vue.config.productionTip = false
+import VJsoneditor from 'v-jsoneditor/src/index'
+Vue.use(VJsoneditor)
 
 new Vue({
   router,
