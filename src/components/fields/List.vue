@@ -10,13 +10,20 @@
             :schema="schema.children"
             @input="viewValue[index] = $event"
             class="flex-fill"
+            :size="'sm'"
           />
-          <b-button variant="outline-danger" class="ml-2" @click="viewValue.splice(index, 1)">
-            <i class="icon-close"></i>
-          </b-button>
+          <div class="ml-2">
+            <b-button 
+              variant="outline-danger"  
+              @click="viewValue.splice(index, 1)"
+              size="sm"
+            >
+              <i class="icon-close"></i>
+            </b-button>
+          </div>
         </div>
       </div>
-      <b-button variant="outline-primary" @click="appendRow">
+      <b-button variant="outline-primary" @click="appendRow" size="sm">
         <i class="icon-plus"></i>
       </b-button>
     </div>
@@ -73,5 +80,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+.item {
+  padding-left: 1em;
+}
 </style>

@@ -2,12 +2,13 @@
   <div>
     <v-jsoneditor v-model="viewValue" v-if="!schema || !schema.schema"/>
     <div v-if="schema && schema.schema" class="subField">
-      <div :cols="allFieldTypes[`${field.type}field`.toLowerCase()].expanded ? 12 : 6" v-for="(field, name) in schema.schema" :key="`field-${name}`" class="px-2">
+      <div v-for="(field, name) in schema.schema" :key="`field-${name}`">
         <b-form-group :label="name">
           <component 
             v-bind:is="`${field.type}field`.toLowerCase()" 
             v-model="viewValue[name]"
             :schema="field"
+            size="sm"
           />
         </b-form-group>
       </div>
@@ -65,7 +66,6 @@ export default {
 
 <style lang="scss" scoped>
 .subField {
-  border-left: 3px solid black;
-  padding-left: 5px;
+  padding-left: 1em;
 }
 </style>
