@@ -8,6 +8,13 @@ import './plugins/bootstrap-vue'
 import VJsoneditor from 'v-jsoneditor/src/index'
 Vue.use(VJsoneditor)
 
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+Vue.use(VueAxios, axios.create({
+  'baseURL': process.env.VUE_APP_API_URL
+}));
+
+
 new Vue({
   router,
   store,

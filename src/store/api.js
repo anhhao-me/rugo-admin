@@ -118,11 +118,15 @@ export default {
     },
 
     // api handle
-    async create({ dispatch }, args){
+    async apiGet({ dispatch }, args){
+      return await dispatch('doGet', [`/${args[0]}/${encodeURIComponent(args[1])}`, args[2]]);
+    },
+
+    async apiCreate({ dispatch }, args){
       return await dispatch('doPost', [`/${args[0]}`, args[1]]);
     },
 
-    async list({ dispatch }, args){
+    async apiList({ dispatch }, args){
       let query = '';
       if (args[1])
         query = `?${qs.stringify(args[1])}`;
@@ -130,11 +134,11 @@ export default {
       return await dispatch('doGet', [`/${args[0]}${query}`]);
     },
 
-    async remove({ dispatch }, args){
+    async apiRemove({ dispatch }, args){
       return await dispatch('doDelete', [`/${args[0]}/${encodeURIComponent(args[1])}`]);
     },
 
-    async patch({ dispatch }, args){
+    async apiPatch({ dispatch }, args){
       return await dispatch('doPatch', [`/${args[0]}/${encodeURIComponent(args[1])}`, args[2]]);
     }
   }

@@ -6,26 +6,41 @@
     <div class="bg-white rounded p-3 mb-3">
       <h3>{{ schema.__label || modelName }}</h3>
     </div>
-    <div class="bg-white rounded p-3 mb-3" v-if="!schema.__model || schema.__model.toLowerCase() === 'mongodb'">
+    <div class="bg-white rounded p-3 mb-3">
       <DataTable
         :schema="schema"
+        :modelName="modelName"
         @create="doCreate" 
         @remove="doRemove"
         @patch="doPatch"
         @list="doList"
         :data="data"
+        v-if="['filesystem'].indexOf(schema.__type) === -1"
+      />
+      <FileExplorer 
+        :schema="schema"
+        :modelName="modelName"
+        @create="doCreate" 
+        @remove="doRemove"
+        @patch="doPatch"
+        @list="doList"
+        :data="data"
+        v-if="schema.__type === 'filesystem'"
       />
     </div>
   </b-container>
 </template>
 
 <script>
-import DataTable from '../components/DataTable'
 import { mapActions, mapMutations, mapState } from 'vuex'
+
+import DataTable from '../components/DataTable'
+import FileExplorer from '../components/FileExplorer'
 
 export default {
   components: {
-    DataTable
+    DataTable,
+    FileExplorer
   },
   computed: {
     ...mapState(['agent']),
@@ -55,17 +70,17 @@ export default {
     }
   },
   methods: {
-    ...mapActions('api', ['create', 'list', 'remove', 'patch', 'getAction']),
+    ...mapActions('api', ['apiCreate', 'apiList', 'apiRemove', 'apiPatch', 'getAction']),
     ...mapMutations('notice', {
       pushNotice: 'push'
     }),
 
     async load(){
-      this.data = await this.list([ this.modelName, this.query]);
+      this.data = await this.apiList([ this.modelName, this.query]);
     },
-    
+
     async doCreate(payload){
-      const res = await this.create([ this.modelName, payload ]);
+      const res = await this.apiCreate([ this.modelName, payload ]);
       if (res.error)
         return;
 
@@ -78,7 +93,7 @@ export default {
       let numRemoved = 0;
 
       for (let id of payload){
-        let res = await this.remove([ this.modelName, id ]);
+        let res = await this.apiRemove([ this.modelName, id ]);
         if (res.error)
           continue;
         numRemoved++;
@@ -96,7 +111,7 @@ export default {
     async doPatch(args){
       const id = args[0];
       const newChange = args[1];
-      const res = await this.patch([ this.modelName, id, newChange ]);
+      const res = await this.apiPatch([ this.modelName, id, newChange ]);
       if (res.error)
         return;
 
