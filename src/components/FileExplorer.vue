@@ -58,6 +58,8 @@
             <template #button-content>
               <i class="icon-options-vertical"></i>
             </template>
+            <b-dropdown-item-button @click="showCodeEditor(item)" v-if="!item.dir">Soạn thảo</b-dropdown-item-button>
+            <b-dropdown-item-button @click="doExtract(item)" v-if="item.type === 'application/zip'">Giải nén</b-dropdown-item-button>
             <b-dropdown-item-button @click="showRename(item)">Đổi tên</b-dropdown-item-button>
             <b-dropdown-item-button @click="doRemove([item._id])">Xóa</b-dropdown-item-button>
           </b-dropdown>
@@ -137,6 +139,15 @@
       </b-modal>
       <!-- end file form -->
 
+      <!-- code editor -->
+      <b-modal id="codeEditor" title="Chỉnh sửa" hide-footer @hide="current = null; currentText = ''">
+        <prism-editor class="CodeEditor" v-model="currentText" :highlight="highlighter"/>
+        <b-form-group class="mb-0 mt-2">
+          <b-button @click="saveCode" variant="primary">Lưu</b-button>
+        </b-form-group>
+      </b-modal>
+      <!-- code editor -->
+
     <!-- END MODALS -->
   </div>
 </template>
@@ -146,6 +157,12 @@ import { mapActions } from 'vuex';
 import FileName from './FileName';
 import path from 'path';
 
+import { PrismEditor } from 'vue-prism-editor';
+import 'vue-prism-editor/dist/prismeditor.min.css'
+import { highlight, languages } from 'prismjs/components/prism-core';
+
+import 'prismjs/components/prism-vim';
+
 const FileTypes = {};
 const req = require.context('./files', true, /\.vue$/i)
 req.keys()
@@ -154,13 +171,13 @@ req.keys()
   FileTypes[`${name}File`.toLowerCase()] = req(key).default;
 });
 
-
 export default {
   props: [
     'data',
     'modelName'
   ],
   components: {
+    PrismEditor,
     FileName,
     ...FileTypes
   },
@@ -188,7 +205,11 @@ export default {
       isDir: null,
 
       // move
-      moveList: []
+      moveList: [],
+
+      // code editor
+      current: null,
+      currentText: null
     }
   },
   computed: {
@@ -262,6 +283,12 @@ export default {
       return await this.doGet([ 
         `/${this.modelName}/${encodeURIComponent(item._id)}?format=binary`,
         { responseType: 'base64' }
+      ]);
+    },
+
+    async loadText(item){
+      return await this.doGet([ 
+        `/${this.modelName}/${encodeURIComponent(item._id)}?format=binary`
       ]);
     },
 
@@ -341,9 +368,34 @@ export default {
       this.moveList = [];
     },
 
+    async showCodeEditor(item){
+      this.current = item;
+      this.currentText = await this.loadText(item);
+      this.$bvModal.show('codeEditor');
+    },
+
+    highlighter(code) {
+      return highlight(code, languages.vim);
+    },
+
+    saveCode(){
+      const formData = new FormData();
+      formData.append('data', new File([new Blob([this.currentText])], this.current.name ));
+
+      this.$emit('patch', [ this.current._id, formData ]);
+    },
+
+    doExtract(item){
+      const formData = new FormData();
+      formData.append('data', item.data.path);
+      formData.append('parent', item.parent);
+      formData.append('extract', true);
+
+      this.$emit('create', formData);
+    }
   },
   mounted(){
-    this.$emit('list', { parent: this.dir });
+    this.$emit('list', { parent: this.parent });
   }
 }
 </script>
@@ -373,5 +425,20 @@ export default {
       width: 3em;
     }
   }
+}
+</style>
+
+<style lang="scss">
+.CodeEditor {
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 5px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+.prism-editor__textarea:focus {
+  outline: none;
 }
 </style>
