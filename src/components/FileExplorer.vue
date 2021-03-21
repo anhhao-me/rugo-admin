@@ -58,7 +58,13 @@
             <template #button-content>
               <i class="icon-options-vertical"></i>
             </template>
-            <b-dropdown-item-button @click="showCodeEditor(item)" v-if="!item.dir">Soạn thảo</b-dropdown-item-button>
+            <b-dropdown-item-button @click="showInfo(item)">Thông tin</b-dropdown-item-button>
+            <b-dropdown-item-button 
+              @click="showCodeEditor(item)" 
+              v-if="!item.dir && item.stats && item.stats.size < 1024*1024"
+            >
+              Soạn thảo
+            </b-dropdown-item-button>
             <b-dropdown-item-button @click="doExtract(item)" v-if="item.type === 'application/zip'">Giải nén</b-dropdown-item-button>
             <b-dropdown-item-button @click="showRename(item)">Đổi tên</b-dropdown-item-button>
             <b-dropdown-item-button @click="doRemove([item._id])">Xóa</b-dropdown-item-button>
@@ -148,6 +154,35 @@
       </b-modal>
       <!-- code editor -->
 
+      <!-- info popup -->
+      <b-modal id="infoPopup" title="Thông tin" hide-footer @hide="current = null">
+        <div v-if="current">
+          <b-row class="mb-2">
+            <b-col><strong>ID</strong></b-col>
+            <b-col>{{ current._id }}</b-col>
+          </b-row>
+          <b-row class="mb-2">
+            <b-col><strong>Cha</strong></b-col>
+            <b-col>{{ current.parent }}</b-col>
+          </b-row>
+          <b-row class="mb-2">
+            <b-col><strong>Kiểu</strong></b-col>
+            <b-col>{{ current.type }}</b-col>
+          </b-row>
+          <div v-if="current.stats">
+            <b-row class="mb-2">
+              <b-col><strong>Kích thước</strong></b-col>
+              <b-col>{{ Math.floor(current.stats.size/1024/1024*100)/100 }} MB</b-col>
+            </b-row>
+            <b-row class="mb-2">
+              <b-col><strong>Ngày sửa</strong></b-col>
+              <b-col>{{ current.stats.ctime }}</b-col>
+            </b-row>
+          </div>
+        </div>
+      </b-modal>
+      <!-- end info popup -->
+
     <!-- END MODALS -->
   </div>
 </template>
@@ -214,7 +249,10 @@ export default {
   },
   computed: {
     parent(){
-      return this.parents.join('/');
+      if (this.parents.length)  
+        return this.parents[this.parents.length - 1]._id;
+      
+      return null;
     },
 
     list(){
@@ -228,8 +266,8 @@ export default {
     },
 
     breadcrumbs(){
-      return this.parents.map(name => ({
-        text: name
+      return this.parents.map(item => ({
+        text: item.name
       }));
     }
   },
@@ -245,15 +283,18 @@ export default {
 
     async back(){
       this.parents.splice(this.parents.length - 1, 1);
-      this.$emit('list', {
-        parent: this.parent
-      });
+      if (this.parent)
+        this.$emit('list', {
+          parent: this.parent
+        });
+      else
+      this.$emit('list');
     },
 
     async open(item){
       if (item.dir){
         this.selected = [];
-        this.parents.push(item.name);
+        this.parents.push(item);
         this.$emit('list', {
           parent: this.parent
         });
@@ -297,7 +338,8 @@ export default {
       
       const formData = new FormData();
       formData.append('name', name);
-      formData.append('parent', this.parent);
+      if (this.parent)
+        formData.append('parent', this.parent);
       formData.append('data', this.uploadFile);
       this.$emit('create', formData);
       this.uploadFile = null;
@@ -328,7 +370,8 @@ export default {
 
       const formData = new FormData();
       formData.append('name', name);
-      formData.append('parent', this.parent);
+      if (this.parent)
+        formData.append('parent', this.parent);
       if (isDir)
         formData.append('dir', true);
       else
@@ -392,10 +435,15 @@ export default {
       formData.append('extract', true);
 
       this.$emit('create', formData);
-    }
+    },
+
+    showInfo(item){
+      this.current = item;
+      this.$bvModal.show('infoPopup');
+    },
   },
   mounted(){
-    this.$emit('list', { parent: this.parent });
+    this.$emit('list');
   }
 }
 </script>
