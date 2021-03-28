@@ -1,27 +1,127 @@
 <template>
   <div>
     <b-form-input 
-      :value="value"
-      @input="$emit('input', $event)" 
-      v-if="realMode === 'input'"
-      :size="size || ''"
-    />
-    <div v-if="realMode === 'preview'">{{ value }}</div>
+      v-model="localValue"
+      v-if="editor === 'input'"
+    ></b-form-input>
+
+    <b-form-textarea 
+      v-model="localValue" 
+      max-rows="10" 
+      rows="3" 
+      v-if="editor === 'textarea'"
+    ></b-form-textarea>
+
+    <vue-editor 
+      v-model="localValue" 
+      :editorOptions="editorSettings"
+      v-if="editor === 'wysiwyg'"
+    ></vue-editor>
+
+    <prism-editor
+      class="CodeEditor" 
+      v-model="localValue" 
+      :highlight="highlighter"
+      v-if="editor === 'code'"
+    ></prism-editor>
   </div>
 </template>
 
 <script>
+import { VueEditor } from "vue2-editor";
+
+import { PrismEditor } from 'vue-prism-editor';
+import 'vue-prism-editor/dist/prismeditor.min.css'
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-vim';
+
 export default {
-  allowModes: ['input', 'preview'],
-  props: ['value', 'mode', 'size'],
+  props: ['value', 'schema'],
+  components: {
+    VueEditor,
+    PrismEditor
+  },
   data(){
+    const that = this;
+
     return {
-      realMode: this.mode || 'input'
+      localValue: this.value || '',
+      editorSettings: {
+        modules: {
+          toolbar: {
+            container: [
+              [{ 'header': [2, 3, 4, false] }],
+              ['bold', 'italic', 'underline', 'link'],
+              [
+                { 'align': null },
+                { 'align': 'center' },
+                { 'align': 'right' }
+              ],
+              [
+                { list: 'ordered' }, 
+                { list: 'bullet' }
+              ],
+              [
+                'image',
+                'code-block'
+              ],
+              ['clean'],
+            ],
+            handlers: {
+              image(){
+                that.currentEditor = this;
+                that.$bvModal.show('insertImagePopup');
+              }
+            }
+          }
+        }
+      },
+    }
+  },
+  computed: {
+    editor(){
+      if (!this.schema)
+        return 'textarea';
+
+      if (this.schema.editor)
+        return this.schema.editor;
+
+      const maxLength = this.schema.maxlength;
+
+      if (maxLength !== undefined && maxLength <= 200)
+        return 'input';
+
+      return 'textarea';
+    }
+  },
+  methods: {
+    highlighter(code) {
+      return highlight(code, languages.vim);
+    },
+  },
+  watch: {
+    localValue(){
+      this.$emit('input', this.localValue);
+    },
+    value(){
+      if (this.localValue !== this.value)
+        this.localValue = this.value;
     }
   }
 }
 </script>
 
-<style>
+<style lang="scss">
+.CodeEditor {
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 5px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
 
+.prism-editor__textarea:focus {
+  outline: none;
+}
 </style>

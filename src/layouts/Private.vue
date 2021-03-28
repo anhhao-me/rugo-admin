@@ -1,6 +1,6 @@
 <template>
   <div class="PrivateLayout">
-    <input type="checkbox" id="openSideBar">
+    <input type="checkbox" id="openSideBar" v-model="isOpenSideBar">
     <label for="openSideBar" class="btn openSideBarLabel">
       <i class="icon-menu"></i>
     </label>
@@ -30,6 +30,11 @@
 import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default {
+  data(){
+    return {
+      isOpenSideBar: false
+    }
+  },
   computed: {
     ...mapState('api', ['token']),
     ...mapState(['agent']),
@@ -66,6 +71,9 @@ export default {
     token(){
       if (this.token)
         this.syncInfo();
+    },
+    $route(){
+      this.isOpenSideBar = false;
     }
   }
 }

@@ -9,10 +9,16 @@ import VJsoneditor from 'v-jsoneditor/src/index'
 Vue.use(VJsoneditor)
 
 import axios from 'axios'
-import VueAxios from 'vue-axios'
-Vue.use(VueAxios, axios.create({
-  'baseURL': process.env.VUE_APP_API_URL
-}));
+import Api from './plugins/api/';
+// import VueAxios from 'vue-axios'
+// Vue.use(VueAxios, axios.create({
+//   'baseURL': process.env.VUE_APP_API_URL
+// }));
+
+Vue.use(Api, {
+  http: axios.create({ 'baseURL': process.env.VUE_APP_API_URL }),
+  store
+});
 
 
 new Vue({

@@ -39,7 +39,7 @@ export default {
     ...mapActions('auth', ['login']),
     async onSubmit(event){
       event.preventDefault()
-      if (await this.login(this.form)){
+      if (await this.$api.authentication(this.form)){
         this.form.password = '';
         this.$router.push('/private/dashboard');
       }

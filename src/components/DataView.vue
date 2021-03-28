@@ -1,0 +1,281 @@
+<template>
+  <div class="DataTable">
+    <b-form-group>
+      <b-button variant="primary" v-b-modal.createEditForm class="mr-2">
+        <i class="icon-doc"></i>
+      </b-button>
+      <b-button variant="danger" class="mr-2" v-if="selected.length > 0" @click="doRemove">
+        <i class="icon-trash"></i>
+      </b-button>
+    </b-form-group>
+    <!-- CREATE FORM MODAL -->
+    <b-modal 
+      id="createEditForm" 
+      hide-footer 
+      :title="mode === 'create' ? 'Tạo mới' : 'Chỉnh sửa'" 
+      @hide="dataForm = {}; mode = 'create'" 
+      v-if="schema"
+      size="lg"
+    >
+      <b-form @submit.prevent="doHandleDataForm">
+        <DataForm :schema="schema" v-model="dataForm"/>     
+        <b-form-group>
+          <b-button type="submit" variant="primary">{{ mode === 'create'? 'Tạo' : 'Sửa' }}</b-button>
+        </b-form-group>
+      </b-form>
+    </b-modal>
+    <!-- END CREATE FORM MODAL -->
+
+    <DataTable 
+      :value="data.data" 
+      v-if="data && data.data"
+      :schema="viewSchema"
+      @select="selected = $event"
+      @edit="showEdit"
+    />
+    
+    <b-pagination
+      class="mt-3"
+      v-if="data"
+      v-model="page"
+      :total-rows="data.total"
+      :per-page="10"
+    ></b-pagination>
+  </div>
+</template>
+
+<script>
+// import Vue from 'vue'
+import { mapActions, mapState } from 'vuex'
+import DataForm from './DataForm';
+import DataTable from './DataTable';
+
+export default {
+  components: {
+    DataForm,
+    DataTable
+  },
+  props: [
+    'schema',
+    'data',
+    'modelName'
+  ],
+  data(){
+    // const that = this;
+
+    return {
+      current: null,
+      selected: [],
+      mode: 'create',
+      dataForm: {},
+      originForm: {},
+      page: 1,
+      preload: {},
+    }
+  },
+  computed: {
+    ...mapState(['agents', 'currentAgent']),
+    viewSchema(){
+      if (!this.schema)
+        return {};
+
+      const newSchema = {};
+      for (let key in this.schema){
+        if (this.schema[key].type)
+          newSchema[key] = this.schema[key];
+      }
+      return newSchema;
+    },
+  },
+  methods: {
+    ...mapActions('api', ['list']),
+
+    async doHandleDataForm(){
+      const res = this.mode === 'create' ? await this.doCreate() : await this.doPatch();
+      
+      if (res){
+        this.$bvModal.hide("createEditForm");
+        this.$emit('list', {
+          $sort: { createdAt: -1 }
+        });
+      }
+    },
+
+    async doCreate(){
+      return await this.$api.create(this.modelName, this.dataForm);
+    },
+
+    doPatch(){
+      for (let key in this.dataForm){
+        if (
+          this.viewSchema[key] 
+          && this.viewSchema[key].type.toLowerCase() === 'password' && this.dataForm[key] === ''
+        ){
+          delete this.dataForm[key];
+          continue;
+        }
+
+        if (
+          this.viewSchema[key]
+          && this.originForm[key] === this.dataForm[key]
+        ){
+          delete this.dataForm[key];
+          continue;
+        }
+      }
+      
+      const id = this.dataForm._id;
+      delete this.dataForm._id;
+
+      this.$emit('patch', [
+        id, this.dataForm
+      ]);
+
+      return true;
+    },
+
+    async doRemove(){
+      const confirm = await this.$bvModal.msgBoxConfirm('Bạn chắc chắn muốn xóa chứ?');
+      if (confirm){
+        this.$emit('remove', this.selected);
+        this.selected = [];
+      }
+    },
+
+    showEdit(item){
+      this.originForm = JSON.parse(JSON.stringify(item));
+      this.dataForm = JSON.parse(JSON.stringify(item));
+      for (let key in this.dataForm){
+        if (key === '_id')
+          continue;
+
+        if (!this.viewSchema[key]){
+          delete this.dataForm[key];
+          continue;
+        }
+        
+        if (this.viewSchema[key].type.toLowerCase() === 'password'){
+          delete this.dataForm[key];
+          continue;
+        }
+      }
+      this.mode = 'edit';
+      this.$bvModal.show('createEditForm');
+    },
+
+    showInfo(item){
+      this.current = item;
+      this.$bvModal.show('infoPopup');
+    },
+
+    updateDataForm(field, value){
+      this.dataForm[field] = value;
+    },
+
+    async preloadSchema(){
+      if (!this.viewSchema)
+        return;
+
+      const preloadList = new Set();
+      for (let key in this.viewSchema)
+        if (this.viewSchema[key].type.toLowerCase() === 'id')
+          preloadList.add(this.viewSchema[key].model);
+
+      for (let model of preloadList){
+        let { data } = await this.list([ this.currentAgent, model, {
+          $limit: -1
+        }]);
+
+        this.$set(this.preload, model, data);
+      }
+    },
+
+    getViewType(field){
+      if (['text'].indexOf(field.type.toLowerCase()) !== -1)
+        return 'shorttext';
+    }
+  },
+  mounted(){
+    this.$emit('list', {
+      $sort: { createdAt: -1 }
+    });
+
+    this.preloadSchema();
+  },
+  watch: {
+    schema(){
+      this.$emit('list', {
+        $sort: { createdAt: -1 }
+      });
+
+      this.preloadSchema();
+    },
+
+    page(){
+      this.$emit('list', {
+        $limit: 10,
+        $skip: (this.page - 1) * 10,
+        $sort: { createdAt: -1 }
+      });
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.displayCell {
+  .tag {
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    padding: 0 8px;
+    display: inline-block;
+    font-size: .8em;
+    font-weight: bold;
+    margin: 2px;
+  }
+}
+</style>
+
+<style lang="scss">
+.ql-editor {
+  line-height: 1.5em;
+  font-family: Quicksand, sans-serif;
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+  }
+
+  h1 { font-size: 1.8em; margin-top: .8em; margin-bottom: .2em; }
+  h2 { font-size: 1.5em; margin-top: .8em; margin-bottom: .2em; }
+  h3 { font-size: 1.1em; margin-top: .8em; margin-bottom: .2em; }
+  h4, h5, h6 { font-size: 1em; margin-top: .8em; margin-bottom: .2em; }
+
+  p {
+    margin-top: .8em !important; 
+    margin-bottom: .2em !important;
+  }
+
+  img {
+    width: 250px;
+    height: 40px;
+    position: relative;
+    display: inline-block;
+  }
+
+  img:after {
+    content: 'Cannot see image? Don\' worry! Image will be displayed here!';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    line-height: 20px;
+    font-size: 12px;
+    text-align: center;
+    background-color: white;
+    background-color: #e0e0e0;
+    padding: 0 5px;
+  }
+}
+</style>

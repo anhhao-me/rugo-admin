@@ -7,10 +7,9 @@
       <h3>{{ schema.__label || modelName }}</h3>
     </div>
     <div class="bg-white rounded p-3 mb-3">
-      <DataTable
+      <DataView
         :schema="schema"
-        :modelName="modelName"
-        @create="doCreate" 
+        :modelName="modelName" 
         @remove="doRemove"
         @patch="doPatch"
         @list="doList"
@@ -34,12 +33,12 @@
 <script>
 import { mapActions, mapMutations, mapState } from 'vuex'
 
-import DataTable from '../components/DataTable'
+import DataView from '../components/DataView'
 import FileExplorer from '../components/FileExplorer'
 
 export default {
   components: {
-    DataTable,
+    DataView,
     FileExplorer
   },
   computed: {
