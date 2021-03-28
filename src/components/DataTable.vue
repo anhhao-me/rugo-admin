@@ -8,7 +8,7 @@
             <b-button :variant="selected.length === 0 ? 'outline-primary' : 'primary'" class="m-0 p-0 d-block toggleCheck" @click="checkToggle" size="sm">
             </b-button>
           </th>
-          <th v-for="(field, name) in schema" :key="name">
+          <th v-for="(field, name) in viewSchema" :key="name">
             {{ field.label || name }}
           </th>
           <th></th>
@@ -25,7 +25,7 @@
             <!-- end select -->
 
             <!-- content -->
-            <td v-for="(field, name) in schema" :key="name">
+            <td v-for="(field, name) in viewSchema" :key="name">
               <component 
                 v-bind:is="`${parseField(field).type}field`" 
                 :value="item[name]"
@@ -91,7 +91,7 @@ req.keys()
 });
 
 export default {
-  props: ['value', 'schema'],
+  props: ['value', 'schema', 'fields'],
   components: {
     ...FieldTypes
   },
@@ -99,6 +99,19 @@ export default {
     return {
       selected: [],
       current: null
+    }
+  },
+  computed: {
+    viewSchema(){
+      if (!this.schema || !this.fields)
+        return [];
+
+      const newSchema = {};
+      for (let name of this.fields){
+        newSchema[name] = this.schema[name];
+      }
+
+      return newSchema;
     }
   },
   methods: {
@@ -163,6 +176,10 @@ export default {
   table {
     td:first-child, td:last-child, th:first-child, th:last-child {
       width: 16px;
+    }
+
+    th, td {
+      max-width: 300px;
     }
   }
 }

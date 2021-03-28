@@ -7,6 +7,14 @@
       <b-button variant="danger" class="mr-2" v-if="selected.length > 0" @click="doRemove">
         <i class="icon-trash"></i>
       </b-button>
+      <b-dropdown no-caret variant="none" >
+        <template #button-content>
+          <i class="icon-options-vertical"></i>
+        </template>
+        <b-form-checkbox-group v-model="displayFields">
+          <b-form-checkbox class="d-block mx-1" :value="name" v-for="(field, name) in viewSchema" :key="name">{{ field.label || name }}</b-form-checkbox>
+        </b-form-checkbox-group>
+      </b-dropdown>
     </b-form-group>
     <!-- CREATE FORM MODAL -->
     <b-modal 
@@ -30,6 +38,7 @@
       :value="data.data" 
       v-if="data && data.data"
       :schema="viewSchema"
+      :fields="displayFields"
       @select="selected = $event"
       @edit="showEdit"
     />
@@ -50,6 +59,8 @@ import { mapActions, mapState } from 'vuex'
 import DataForm from './DataForm';
 import DataTable from './DataTable';
 
+const PREVIEW_FIELDS = ['text', 'email', 'number', 'datetime', 'checkbox'];
+
 export default {
   components: {
     DataForm,
@@ -66,11 +77,11 @@ export default {
     return {
       current: null,
       selected: [],
+      displayFields: [],
       mode: 'create',
       dataForm: {},
       originForm: {},
-      page: 1,
-      preload: {},
+      page: 1
     }
   },
   computed: {
@@ -176,17 +187,23 @@ export default {
       if (!this.viewSchema)
         return;
 
-      const preloadList = new Set();
-      for (let key in this.viewSchema)
-        if (this.viewSchema[key].type.toLowerCase() === 'id')
-          preloadList.add(this.viewSchema[key].model);
+      const raw = localStorage.getItem(`display-fields-${this.modelName}`);
 
-      for (let model of preloadList){
-        let { data } = await this.list([ this.currentAgent, model, {
-          $limit: -1
-        }]);
+      if (raw){
+        try {
+          this.displayFields = JSON.parse(raw);
+          return;
+        } catch(err){
+          localStorage.removeItem(`display-fields-${this.modelName}`);
+        }
+      }
 
-        this.$set(this.preload, model, data);
+      for (let name in this.viewSchema){
+        let field = this.viewSchema[name];
+        if (PREVIEW_FIELDS.indexOf(field.type) !== -1
+          && !field.hide
+        )
+          this.displayFields.push(name);
       }
     },
 
@@ -217,6 +234,13 @@ export default {
         $skip: (this.page - 1) * 10,
         $sort: { createdAt: -1 }
       });
+    },
+
+    displayFields: {
+      deep: true,
+      handler(){
+        localStorage.setItem(`display-fields-${this.modelName}`, JSON.stringify(this.displayFields));
+      }
     }
   }
 }

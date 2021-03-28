@@ -1,17 +1,12 @@
 <template>
-  <div class="d-flex">
-    <b-form-datepicker
-      class="mr-1"
-      v-model="date"
-      @input="update"
-    />
-    <b-form-timepicker 
-      show-seconds
-      :hour12="false"
-      class="ml-1" v-model="time"
-      @input="update"
-    />
-  </div>
+  <b-form-input
+    v-model="localValue"
+    :state="state"
+    :placeholder="format"
+    :aria-invalid="true"
+    v-b-tooltip.hover 
+    :title="format"
+  />
 </template>
 
 <script>
@@ -21,51 +16,43 @@ export default {
   props: ['value'],
   data(){
     return {
-      date: null,
-      time: null
+      localValue: '',
+      format: 'YYYY-MM-DD HH:mm:ss'
     }
   },
   computed: {
-    formatedValue(){
-      return moment(this.value).format('YYYY-MM-DD HH:mm:ss');
-    }
-  },
-  methods: {
-    update(){
-      const d = moment(`${this.date} ${this.time}`, 'YYYY-MM-DD HH:mm:ss').toDate();
-      this.$emit('input', d);
-    },
-    breakValue(value){
-      if (!this.value){
-        return { date: null, time: null };
-      }
+    state(){
+      if (!this.localValue)
+        return null;
 
-      const d = moment(value);
-      const date = d.format('YYYY-MM-DD');
-      const time = d.format('HH:mm:ss');
+      if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2}$/gm.test(this.localValue.trim()))
+        return false;
 
-      return { date, time };
+      return moment(this.localValue.trim(), this.format).isValid();
     }
   },
   mounted(){
-    const { date, time } = this.breakValue(this.value);
-    if (this.date !== date)
-      this.date = date;
-    if (this.time !== time)
-      this.time = time;
+    if (this.value)
+      this.localValue = moment(this.value).format(this.format);
   },
   watch: {
     value(){
-      const { date, time } = this.breakValue(this.value);
-      if (this.date !== date)
-        this.date = date;
-      if (this.time !== time)
-        this.time = time;
+      const viewValue = moment(this.value).format(this.format);
+      if (viewValue !== this.localValue)
+        this.localValue = viewValue;
+    },
+    localValue(){
+      if (this.state)
+        this.$emit('input', this.localValue);
     }
   }
 }
 </script>
 
-<style>
-
+<style lang="scss" scoped>
+.danger {
+  box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 0, 0, .5);
+  color: darkred;
+}
 </style>
