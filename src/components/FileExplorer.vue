@@ -482,8 +482,17 @@ export default {
   font-size: 14px;
   line-height: 1.5;
   padding: 5px;
-  background-color: #f0f0f0;
+  background-color: white;
+  border: 1px solid #ced4da;
   border-radius: 5px;
+
+  &:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #626262;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(34, 34, 34, 0.25);
+  }
 }
 
 .prism-editor__textarea:focus {

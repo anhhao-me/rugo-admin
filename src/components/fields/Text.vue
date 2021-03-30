@@ -123,18 +123,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.CodeEditor {
-  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  padding: 5px;
-  background-color: #f0f0f0;
-  border-radius: 5px;
-}
-
-.prism-editor__textarea:focus {
-  outline: none;
-}
-</style>
