@@ -45,7 +45,7 @@ export default {
     const that = this;
 
     return {
-      localValue: this.value || '',
+      localValue: '',
       editorSettings: {
         modules: {
           toolbar: {
@@ -98,14 +98,27 @@ export default {
     highlighter(code) {
       return highlight(code, languages.vim);
     },
+    rawToString(raw){
+      if (!raw)
+        return '';
+
+      if (typeof raw === 'object')
+        return JSON.stringify(raw, 0, 2);
+
+      return raw.toString();
+    }
+  },
+  mounted(){
+    this.localValue = this.rawToString(this.value);
   },
   watch: {
     localValue(){
       this.$emit('input', this.localValue);
     },
     value(){
-      if (this.localValue !== this.value)
-        this.localValue = this.value;
+      const strValue = this.rawToString(this.value);
+      if (this.localValue !== strValue)
+        this.localValue = strValue;
     }
   }
 }

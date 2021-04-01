@@ -1,6 +1,6 @@
 <template>
   <div class="DataTable" v-if="value">
-    <b-form-checkbox-group v-model="selected">
+    <b-form-checkbox-group v-model="selected" class="table-responsive" v-dragscroll>
       <table class="table mb-0">
         <!-- header -->
         <thead>
