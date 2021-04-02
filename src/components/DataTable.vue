@@ -1,5 +1,5 @@
 <template>
-  <div class="DataTable" v-if="value">
+  <div class="DataTable" v-if="value && viewSchema">
     <b-form-checkbox-group v-model="selected" class="table-responsive" v-dragscroll>
       <table class="table mb-0">
         <!-- header -->

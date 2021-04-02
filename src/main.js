@@ -15,6 +15,8 @@ Vue.use(Api, {
 import VueDragscroll from 'vue-dragscroll'
 Vue.use(VueDragscroll)
 
+import 'vue-search-select/dist/VueSearchSelect.css'
+
 new Vue({
   router,
   store,

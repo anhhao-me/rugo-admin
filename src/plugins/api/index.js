@@ -1,5 +1,6 @@
 import axios from 'axios'
 import path from 'path'
+import qs from 'qs'
 
 export default {
   async install(Vue, { http, store }){
@@ -54,6 +55,32 @@ export default {
           const config = prepareConfig();
           const res = await http.post(path.join('/', model), payload, config);
           pushSuccess('Đã tạo');
+          return res.data;
+        } catch(err){
+          handleError(err);
+          return;
+        }
+      },
+
+      async list(model, payload){
+        try {
+          const config = prepareConfig();
+          let query = '';
+          if (payload)
+            query = `?${qs.stringify(payload)}`;
+
+          const res = await http.get(path.join('/', `${model}${query}`), config);
+          return res.data;
+        } catch(err){
+          handleError(err);
+          return;
+        }
+      },
+
+      async get(model, id){
+        try {
+          const config = prepareConfig();
+          const res = await http.get(path.join('/', model, id), config);
           return res.data;
         } catch(err){
           handleError(err);
