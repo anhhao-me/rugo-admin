@@ -16,6 +16,10 @@ export default {
     }
 
     const handleError = err => {
+      if (err.response.status === 404){
+        return null;
+      }
+
       if (err.response && err.response.data && err.response.data.error){
         pushError(err.response.data.error);
         return;
@@ -84,7 +88,7 @@ export default {
           return res.data;
         } catch(err){
           handleError(err);
-          return;
+          return null;
         }
       }
     }
