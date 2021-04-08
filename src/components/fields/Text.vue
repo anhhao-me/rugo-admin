@@ -12,6 +12,14 @@
       v-if="editor === 'textarea'"
     ></b-form-textarea>
 
+    <FileField 
+      class="filefield"
+      :schema="schema" 
+      v-if="FileField.validate(schema)"
+      v-model="imageUrl"
+      :show="showFilePopup"
+      @show="showFilePopup = $event"/>
+
     <vue-editor 
       v-model="localValue" 
       :editorOptions="editorSettings"
@@ -35,11 +43,14 @@ import 'vue-prism-editor/dist/prismeditor.min.css'
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-vim';
 
+import FileField from './File';
+
 export default {
   props: ['value', 'schema'],
   components: {
     VueEditor,
-    PrismEditor
+    PrismEditor,
+    FileField
   },
   data(){
     const that = this;
@@ -70,12 +81,16 @@ export default {
             handlers: {
               image(){
                 that.currentEditor = this;
-                that.$bvModal.show('insertImagePopup');
+                that.imageUrl = '';
+                that.showFilePopup = true;
               }
             }
           }
         }
       },
+      FileField,
+      showFilePopup: false,
+      imageUrl: ''
     }
   },
   computed: {
@@ -119,7 +134,42 @@ export default {
       const strValue = this.rawToString(this.value);
       if (this.localValue !== strValue)
         this.localValue = strValue;
+    },
+    imageUrl(){
+      if (this.imageUrl){
+        this.currentEditor.quill.focus();
+        const range = this.currentEditor.quill.getSelection();
+        this.currentEditor.quill.insertEmbed(range.index, 'image', this.imageUrl);
+        this.imageUrl = '';
+      }
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.filefield {
+  display: none;
+}
+</style>
+
+<style lang="scss">
+.ql-editor {
+  line-height: 1.5em;
+  font-family: Quicksand, sans-serif;
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+  }
+
+  h1 { font-size: 1.8em; margin-top: .8em; margin-bottom: .2em; }
+  h2 { font-size: 1.5em; margin-top: .8em; margin-bottom: .2em; }
+  h3 { font-size: 1.1em; margin-top: .8em; margin-bottom: .2em; }
+  h4, h5, h6 { font-size: 1em; margin-top: .8em; margin-bottom: .2em; }
+
+  p {
+    margin-top: .8em !important; 
+    margin-bottom: .2em !important;
+  }  
+}
+</style>

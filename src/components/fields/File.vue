@@ -9,7 +9,7 @@
       <b-input-group-append>
         <b-button v-b-modal="popupId" variant="primary" style="width: 80px">Chọn</b-button>
       </b-input-group-append>
-      <b-modal :id="popupId" hide-footer title="Chọn tập tin">
+      <b-modal :id="popupId" hide-footer title="Chọn tập tin" @show="$emit('show', true)" @hide="$emit('show', false)">
         <div class="d-flex w-100">
           <b-form-group class="w-100">
             <b-form-file
@@ -63,7 +63,7 @@ import moment from 'moment';
 import uniqid from 'uniqid';
 
 export default {
-  props: ['value', 'schema'],
+  props: ['value', 'schema', 'show'],
   validate(schema){
     return !!schema.ref;
   },
@@ -183,6 +183,15 @@ export default {
     }
 
     await this.load();
+  },
+  watch: {
+    show(){
+      if (this.show){
+        this.$bvModal.show(this.popupId);
+      } else {
+        this.$bvModal.hide(this.popupId);
+      }
+    }
   }
 }
 </script>
