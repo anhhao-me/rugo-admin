@@ -12,6 +12,12 @@
       v-if="editor === 'textarea'"
     ></b-form-textarea>
 
+    <b-form-select
+      v-model="localValue"
+      :options="schema.enum"
+      v-if="editor = 'select'"
+    />
+
     <FileField 
       class="filefield"
       :schema="schema" 
@@ -97,6 +103,9 @@ export default {
     editor(){
       if (!this.schema)
         return 'textarea';
+
+      if (this.schema.enum)
+        return 'select';
 
       if (this.schema.editor)
         return this.schema.editor;
