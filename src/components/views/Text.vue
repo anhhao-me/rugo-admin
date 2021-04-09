@@ -9,7 +9,7 @@ export default {
   props: ['value'],
   computed: {
     viewValue(){
-      if (!this.value)
+      if (this.value === undefined || this.value === null)
         return '';
 
       if (typeof this.value === 'object')

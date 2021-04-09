@@ -15,7 +15,7 @@
     <b-form-select
       v-model="localValue"
       :options="schema.enum"
-      v-if="editor = 'select'"
+      v-if="editor === 'select'"
     />
 
     <FileField 
