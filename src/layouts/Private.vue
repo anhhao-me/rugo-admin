@@ -10,10 +10,21 @@
       <div class="sideBarHeader p-4">
         <img src="@/assets/images/logo-text.png" alt="" class="w-100">
       </div>
+      <!-- dashboard -->
+      <router-link class="item d-flex" to="/private/dashboard">
+        <div class="icon"><i class="icon-grid"></i></div>
+        <div class="label">Bảng điều khiển</div>
+      </router-link>
+      <!-- end dashboard -->
+
+      <!-- model link -->
+      <hr v-if="agent.models.length !== 0">
       <router-link class="item d-flex" :to="`/private/models/${name}`" v-for="(schema, name) in agent.models" :key="`schema-${name}`">
         <div class="icon"><i :class="`icon-${ schema.__icon || 'doc'}`"></i></div>
         <div class="label">{{ schema.__label || name }}</div>
       </router-link>
+      <!-- end model link -->
+
       <hr>
       <a class="item d-flex" @click="doLogout"> 
         <div class="icon"><i :class="`icon-logout`"></i></div>
