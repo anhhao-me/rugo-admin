@@ -18,7 +18,7 @@
       <!-- end dashboard -->
 
       <!-- model link -->
-      <hr v-if="agent.models.length !== 0">
+      <hr v-if="agent.models && agent.models.length !== 0">
       <router-link class="item d-flex" :to="`/private/models/${name}`" v-for="(schema, name) in agent.models" :key="`schema-${name}`">
         <div class="icon"><i :class="`icon-${ schema.__icon || 'doc'}`"></i></div>
         <div class="label">{{ schema.__label || name }}</div>

@@ -191,8 +191,9 @@ export default {
 
       if (raw){
         try {
-          this.displayFields = JSON.parse(raw);
-          return;
+          this.displayFields = JSON.parse(raw).filter(name => !!this.viewSchema[name]);
+          if (this.displayFields.length > 0)
+            return;
         } catch(err){
           localStorage.removeItem(`display-fields-${this.modelName}`);
         }
