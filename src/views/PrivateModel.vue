@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 
 import DataView from '../components/DataView'
 import FileExplorer from '../components/FileExplorer'
@@ -69,22 +69,16 @@ export default {
     }
   },
   methods: {
-    ...mapActions('api', ['apiCreate', 'apiList', 'apiRemove', 'apiPatch', 'getAction']),
     ...mapMutations('notice', {
       pushNotice: 'push'
     }),
 
     async load(){
-      this.data = await this.apiList([ this.modelName, this.query]);
+      this.data = await this.$api.list(this.modelName, this.query);
     },
 
     async doCreate(payload){
-      const res = await this.apiCreate([ this.modelName, payload ]);
-      if (res.error)
-        return;
-
-      this.pushNotice({ text: `Đã tạo`, type: 'success' });
-
+      await this.$api.create(this.modelName, payload);
       await this.load();
     },
 
@@ -92,7 +86,7 @@ export default {
       let numRemoved = 0;
 
       for (let id of payload){
-        let res = await this.apiRemove([ this.modelName, id ]);
+        let res = await this.$api.remove(this.modelName, id);
         if (res.error)
           continue;
         numRemoved++;
@@ -110,11 +104,7 @@ export default {
     async doPatch(args){
       const id = args[0];
       const newChange = args[1];
-      const res = await this.apiPatch([ this.modelName, id, newChange ]);
-      if (res.error)
-        return;
-
-      this.pushNotice({ text: `Đã sửa`, type: 'success' });
+      await this.$api.patch(this.modelName, id, newChange);
       await this.load();
     }
   },

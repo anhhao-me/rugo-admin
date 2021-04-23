@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import auth from './auth'
-import api from './api'
 import notice from './notice'
 
 Vue.use(Vuex)
@@ -10,17 +8,28 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: () => ({
     agent: {},
+    isLoad: false,
+    token: sessionStorage.getItem('token')
   }),
   mutations: {
     setAgent(state, value){
       state.agent = value;
     },
+    setToken(state, value){
+      state.token = value;
+
+      if (!value){
+        sessionStorage.removeItem('token');
+      } else
+        sessionStorage.setItem('token', value);
+    },
+    setIsLoad(state, value){
+      state.isLoad = value;
+    }
   },
   actions: {
   },
   modules: {
-    auth,
-    api,
     notice
   }
 })

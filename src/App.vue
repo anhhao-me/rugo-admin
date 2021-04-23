@@ -1,5 +1,7 @@
 <template>
   <div id="app">
+    <div class="loader" v-if="isLoad">
+    </div>
     <router-view/>
   </div>
 </template>
@@ -14,6 +16,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(['isLoad']),
     ...mapState('notice', ['isNotice'])
   },
   methods: {
@@ -43,5 +46,23 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader {
+  position: fixed;
+  bottom: 1em;
+  left: 1em;
+  z-index: 2000;
+
+  border: 5px solid #e0e0e0; /* Light grey */
+  border-top: 5px solid #424242; /* Blue */
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin .5s linear infinite;
+}
 </style>

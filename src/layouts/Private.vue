@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 
 export default {
   data(){
@@ -47,22 +47,20 @@ export default {
     }
   },
   computed: {
-    ...mapState('api', ['token']),
-    ...mapState(['agent']),
+    ...mapState(['agent', 'token']),
   },
   methods: {
-    ...mapMutations(['setAgent']),
-    ...mapActions('auth', ['logout', 'sync']),
+    ...mapMutations(['setAgent', 'setToken']),
     ...mapMutations('notice', {
       pushNotice: 'push'
     }),
     async doLogout(){
-      await this.logout();
+      this.setToken(null);
       this.$router.push('/login')
     },
 
     async syncInfo(){
-      const res = await this.sync();
+      const res = await this.$api.httpGet('/');
       if (!res || !res.agent){
         this.$router.push('/login');
         return;
