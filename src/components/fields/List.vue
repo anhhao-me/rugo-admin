@@ -1,11 +1,18 @@
 <template>
   <div class="ListField">
-    <DataForm
-      :schema="childSchema"
-      v-model="localValue"
-      @custom="localValue.splice($event, 1)"
-    />
-    <b-button variant="outline-primary" size="sm" @click="localValue.push(null)">Thêm</b-button>
+    <div 
+      class="item"
+      v-for="item in localValue"
+      :key="item.id"
+    >
+      <DataFormInner 
+        class="inner"
+        :field="schema.children" 
+        v-model="item.value"
+      />
+      <button type="button" class="custom" @click="removeValue(item.id)"></button>
+    </div>
+    <b-button variant="outline-primary" size="sm" @click="addValue()">Thêm</b-button>
   </div>
 </template>
 
@@ -16,11 +23,12 @@ export default {
     return !!schema.children;
   },
   beforeCreate: function () {
-    this.$options.components.DataForm = require('../DataForm.vue').default
+    this.$options.components.DataFormInner = require('../DataFormInner.vue').default
   },
   data(){
     return {
-      localValue: []
+      localValue: [],
+      currentId: 0,
     }
   },
   computed: {
@@ -29,22 +37,42 @@ export default {
     }
   },
   methods: {
+    addValue(value = null){
+      this.localValue.push({
+        id: this.currentId++,
+        value
+      });
+    },
+    removeValue(id){
+      for (let i = 0; i < this.localValue.length; i++)
+        if (this.localValue[i].id === id){
+          this.localValue.splice(i, 1);
+          return;
+        }
+    }
   },
   mounted(){
-    this.localValue = this.value || [];
+    this.localValue = [];
+    for (let val of (this.value || [])){
+      this.addValue(val);
+    }
   },
   watch: {
     value: {
       deep: true,
       handler(){
-        this.localValue = this.value || [];
+        this.localValue = [];
+        for (let val of (this.value || [])){
+          this.addValue(val);
+        }
       }
     },
     localValue: {
       deep: true,
       handler(){
-        if (JSON.stringify(this.value) !== JSON.stringify(this.localValue)){
-          this.$emit('input', this.localValue);
+        const actualValue = this.localValue.map(item => item.value);
+        if (JSON.stringify(this.value) !== JSON.stringify(actualValue)){
+          this.$emit('input', actualValue);
         }
       }
     }
@@ -52,51 +80,52 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .ListField {
-  .DataForm {
+  counter-reset: section;
+
+  .item {
     padding-left: 25px;
-    counter-reset: section;
+    position: relative;
 
-    .form-group {
-      position: relative;
+    .inner {
+      padding: 0;
+      background-color: transparent;
+      border: none;
+      margin-bottom: 0;
+    }
 
-      legend {
-        display: none;
-      }
+    &:before, .custom {
+      display: block !important;
+      position: absolute;
+      left: 0px;
+      background-color: #e0e0e0;
+      width: 20px;
+      text-align: center;
+      border-radius: .2em;
+      border: 1px solid #aaa;
+      font-size: .7em;
+      line-height: 1.7em;
+      height: 20px;
+    }
 
-      &:before, .custom {
-        display: block !important;
-        position: absolute;
-        left: -25px;
-        background-color: #e0e0e0;
-        width: 20px;
-        text-align: center;
-        border-radius: .2em;
-        border: 1px solid #aaa;
-        font-size: .7em;
-        line-height: 1.7em;
-        height: 20px;
-      }
-
-      .custom {
-        top: 25px;
-        border: 1px solid darkred;
-        background-color: rgba(255, 0, 0, .2);
-        padding: 0;
-        color: darkred;
-
-        &:before {
-          content: "\e054";
-          font-family: 'simple-line-icons';
-        }
-      }
+    .custom {
+      top: 25px;
+      border: 1px solid darkred;
+      background-color: rgba(255, 0, 0, .2);
+      padding: 0;
+      color: darkred;
 
       &:before {
-        counter-increment: section;
-        content: counter(section);
-        top: 0;
+        content: "\e054";
+        font-family: 'simple-line-icons';
       }
+    }
+
+    &:before {
+      counter-increment: section;
+      content: counter(section);
+      top: 0px;
     }
   }
 }
