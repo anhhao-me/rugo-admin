@@ -42,24 +42,21 @@ export default {
     FileExplorer
   },
   computed: {
-    ...mapState(['agent']),
-    schema(){
-      return (this.agent.models || {})[this.modelName] || null;
+    ...mapState(['models']),
+
+    model(){
+      return (this.models || []).filter(model => model.name === this.modelName)[0] || null;
     },
 
-    // breadcrumbs(){
-    //   if (!this.agent)
-    //     return [];
+    schema(){
+      return this.model ? this.model.schema : null;
+    },
 
-    //   return [
-    //     {
-    //       text: this.agent._id
-    //     },
-    //     {
-    //       text: this.modelName,
-    //     }
-    //   ]
-    // }
+    breadcrumbs(){
+      return [
+        { text: this.modelName }
+      ];
+    }
   },
   data(){
     return {

@@ -7,13 +7,13 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: () => ({
-    agent: {},
+    models: [],
     isLoad: false,
     token: sessionStorage.getItem('token')
   }),
   mutations: {
-    setAgent(state, value){
-      state.agent = value;
+    setModels(state, value){
+      state.models = value;
     },
     setToken(state, value){
       state.token = value;

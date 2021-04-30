@@ -55,7 +55,7 @@
 
 <script>
 // import Vue from 'vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions } from 'vuex'
 import DataForm from './DataForm';
 import DataTable from './DataTable';
 
@@ -85,8 +85,8 @@ export default {
     }
   },
   computed: {
-    ...mapState(['agents', 'currentAgent']),
     viewSchema(){
+      console.log(this.schema)
       if (!this.schema)
         return {};
 

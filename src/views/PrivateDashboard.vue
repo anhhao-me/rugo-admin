@@ -6,16 +6,16 @@
     <div class="modelList">
       <b-row class="px-2">
         <b-col 
-          v-for="(schema, name) in agent.models"
-          :key="name" 
+          v-for="model in models"
+          :key="model.name" 
           class="px-2 pb-3" 
           cols="6" 
           md="4" 
           lg="3"
         >
-          <router-link  :to="`/private/models/${name}`" class="item rounded w-100 h-100 p-3 d-block">
-            <div class="icon"><i :class="`icon-${ schema.__icon || 'doc'}`"></i></div>
-            <div class="label">{{ schema.__label || name }}</div>
+          <router-link  :to="`/private/models/${model.name}`" class="item rounded w-100 h-100 p-3 d-block">
+            <div class="icon"><i :class="`icon-${ model.icon || 'doc'}`"></i></div>
+            <div class="label">{{ model.label || model.name }}</div>
           </router-link>
         </b-col>
       </b-row>
@@ -31,7 +31,7 @@ import { mapState } from 'vuex'
 
 export default {
   computed: {
-    ...mapState(['agent'])
+    ...mapState(['models'])
   }
 }
 </script>
