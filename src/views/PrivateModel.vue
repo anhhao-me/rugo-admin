@@ -1,33 +1,25 @@
 <template>
-  <b-container class="py-3" v-if="schema">
-    <!-- <small>
-      <b-breadcrumb :items="breadcrumbs" class="p-0"/>
-    </small> -->
-    <div class="bg-white rounded p-3 mb-3">
-      <h3>{{ schema.__label || modelName }}</h3>
-    </div>
-    <div class="bg-white rounded p-3 mb-3">
-      <DataView
-        :schema="schema"
-        :modelName="modelName" 
-        @remove="doRemove"
-        @patch="doPatch"
-        @list="doList"
-        :data="data"
-        v-if="['filesystem'].indexOf(schema.__type) === -1"
-      />
-      <FileExplorer 
-        :schema="schema"
-        :modelName="modelName"
-        @create="doCreate" 
-        @remove="doRemove"
-        @patch="doPatch"
-        @list="doList"
-        :data="data"
-        v-if="schema.__type === 'filesystem'"
-      />
-    </div>
-  </b-container>
+  <div class="bg-white rounded p-3 mb-3">
+    <DataView
+      :schema="schema"
+      :modelName="modelName" 
+      @remove="doRemove"
+      @patch="doPatch"
+      @list="doList"
+      :data="data"
+      v-if="['filesystem'].indexOf(schema.__type) === -1"
+    />
+    <FileExplorer 
+      :schema="schema"
+      :modelName="modelName"
+      @create="doCreate" 
+      @remove="doRemove"
+      @patch="doPatch"
+      @list="doList"
+      :data="data"
+      v-if="schema.__type === 'filesystem'"
+    />
+  </div>
 </template>
 
 <script>
@@ -69,6 +61,7 @@ export default {
     ...mapMutations('notice', {
       pushNotice: 'push'
     }),
+    ...mapMutations(['setTitle']),
 
     async load(){
       this.data = await this.$api.list(this.modelName, this.query);
@@ -106,12 +99,16 @@ export default {
     }
   },
   async mounted(){
+    this.setTitle(this.schema.__label || this.modelName);
   },
   watch: {
     async $route(){
       this.modelName = this.$route.params.name;
       this.query = {};
       this.data = {};
+    },
+    schema(){
+      this.setTitle(this.schema.__label || this.modelName);
     }
   }
 }

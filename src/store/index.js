@@ -8,12 +8,17 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: () => ({
     models: [],
+    utils: [],
     isLoad: false,
-    token: sessionStorage.getItem('token')
+    token: sessionStorage.getItem('token'),
+    title: null
   }),
   mutations: {
     setModels(state, value){
       state.models = value;
+    },
+    setUtils(state, value){
+      state.utils = value;
     },
     setToken(state, value){
       state.token = value;
@@ -25,6 +30,9 @@ export default new Vuex.Store({
     },
     setIsLoad(state, value){
       state.isLoad = value;
+    },
+    setTitle(state, value){
+      state.title = value;
     }
   },
   actions: {

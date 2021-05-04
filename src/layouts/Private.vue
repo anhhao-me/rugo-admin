@@ -32,7 +32,12 @@
       </a>
     </div>
     <div class="mainView">
-      <router-view/>
+      <b-container class="py-3">
+        <div class="bg-white rounded p-3 mb-3" v-if="title">
+          <h3>{{ title }}</h3>
+        </div>
+        <router-view/>
+      </b-container>
     </div>
   </div>
 </template>
@@ -47,10 +52,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(['models', 'token']),
+    ...mapState(['models', 'token', 'title']),
   },
   methods: {
-    ...mapMutations(['setModels', 'setToken']),
+    ...mapMutations(['setModels', 'setToken', 'setUtils', 'setTitle']),
     ...mapMutations('notice', {
       pushNotice: 'push'
     }),
@@ -68,6 +73,7 @@ export default {
       }
 
       this.setModels(res.models);
+      this.setUtils(res.utils);
     }
   },
   mounted(){
@@ -85,6 +91,7 @@ export default {
     },
     $route(){
       this.isOpenSideBar = false;
+      this.setTitle(null);
     }
   }
 }
