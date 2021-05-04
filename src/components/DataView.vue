@@ -201,7 +201,7 @@ export default {
 
       for (let name in this.viewSchema){
         let field = this.viewSchema[name];
-        if (PREVIEW_FIELDS.indexOf(field.type) !== -1
+        if (PREVIEW_FIELDS.indexOf(field.type.toLowerCase()) !== -1
           && !field.hide
         )
           this.displayFields.push(name);
