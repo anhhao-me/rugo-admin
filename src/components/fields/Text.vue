@@ -166,6 +166,7 @@ export default {
 .ql-editor {
   line-height: 1.5em;
   font-family: Quicksand, sans-serif;
+  max-height: 500px;
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: bold;

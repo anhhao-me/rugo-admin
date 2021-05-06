@@ -89,6 +89,7 @@ export default {
     padding-left: 25px;
     position: relative;
     margin-bottom: .5em;
+    min-height: 50px;
 
     .inner {
       padding: 0;
