@@ -61,19 +61,20 @@ export default {
     value: {
       deep: true,
       handler(){
-        this.localValue = [];
-        for (let val of (this.value || [])){
-          this.addValue(val);
+        const actualValue = this.localValue.map(item => item.value);
+
+        if (JSON.stringify(this.value) !== JSON.stringify(actualValue)){
+          this.localValue = [];
+          for (let val of (this.value || [])){
+            this.addValue(val);
+          }
         }
       }
     },
     localValue: {
       deep: true,
       handler(){
-        const actualValue = this.localValue.map(item => item.value);
-        if (JSON.stringify(this.value) !== JSON.stringify(actualValue)){
-          this.$emit('input', actualValue);
-        }
+        this.$emit('input', this.localValue.map(item => item.value));
       }
     }
   }
@@ -87,6 +88,7 @@ export default {
   .item {
     padding-left: 25px;
     position: relative;
+    margin-bottom: .5em;
 
     .inner {
       padding: 0;

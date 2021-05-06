@@ -86,7 +86,6 @@ export default {
   },
   computed: {
     viewSchema(){
-      console.log(this.schema)
       if (!this.schema)
         return {};
 

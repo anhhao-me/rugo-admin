@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded p-3 mb-3">
+  <div class="bg-white rounded p-3 mb-3" v-if="schema">
     <DataView
       :schema="schema"
       :modelName="modelName" 
@@ -99,7 +99,7 @@ export default {
     }
   },
   async mounted(){
-    this.setTitle(this.schema.__label || this.modelName);
+    this.setTitle((this.schema ? this.schema.__label : '') || this.modelName);
   },
   watch: {
     async $route(){
@@ -108,7 +108,7 @@ export default {
       this.data = {};
     },
     schema(){
-      this.setTitle(this.schema.__label || this.modelName);
+      this.setTitle((this.schema ? this.schema.__label : '') || this.modelName);
     }
   }
 }
