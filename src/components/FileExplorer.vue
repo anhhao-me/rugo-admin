@@ -188,7 +188,6 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
 import FileName from './FileName';
 import path from 'path';
 
@@ -272,8 +271,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions('api', ['doGet']),
-
     checkToggle(){
       if (!this.selected.length)
         this.selected = this.data.data.map(item => item._id);
@@ -321,16 +318,11 @@ export default {
     },
 
     async loadFile(item){
-      return await this.doGet([ 
-        `/${this.modelName}/${encodeURIComponent(item._id)}?format=binary`,
-        { responseType: 'base64' }
-      ]);
+      return await this.$api.httpGet(`/${this.modelName}/${encodeURIComponent(item._id)}?format=binary`, { responseType: 'base64' });
     },
 
     async loadText(item){
-      return await this.doGet([ 
-        `/${this.modelName}/${encodeURIComponent(item._id)}?format=binary`
-      ]);
+      return await this.$api.httpGet(`/${this.modelName}/${encodeURIComponent(item._id)}?format=binary`);
     },
 
     async doUpload(){

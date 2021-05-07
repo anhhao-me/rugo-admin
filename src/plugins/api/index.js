@@ -158,15 +158,26 @@ export default {
       },
 
       // raw api
-      async httpGet(url){
+      async httpGet(url, opts = {}){
         this.onload();
 
         try {
-          const config = prepareConfig();
+          const config = Object.assign(prepareConfig(), opts);
+          let isBase64 = false;
+          if (config.responseType === 'base64'){
+            isBase64 = true;
+            config.responseType = 'arraybuffer';
+          }
+
           const res = await http.get(url, config);
-          
           this.outload();
-          return res.data;
+
+          if (isBase64){
+            let raw = Buffer.from(res.data).toString('base64');
+            return "data:" + res.headers["content-type"] + ";base64,"+raw;
+          } else 
+            return res.data;
+            
         } catch(err){
           handleError(err);
           
