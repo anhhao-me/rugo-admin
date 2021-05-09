@@ -72,7 +72,20 @@ export default {
         return;
       }
 
-      this.setModels(res.models);
+      this.setModels(res.models.map(model => {
+        const schema = {};
+        for (let name in model.schema){
+          if (name.indexOf('__') !== 0 && typeof model.schema[name] === 'string'){
+            schema[name] = {
+              type: model.schema[name]
+            }
+          } else {
+            schema[name] = model.schema[name];
+          }
+        }
+
+        return Object.assign({}, model, { schema });
+      }));
       this.setUtils(res.utils);
     }
   },
