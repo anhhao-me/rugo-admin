@@ -32,10 +32,12 @@
       </a>
     </div>
     <div class="mainView">
+      <div class="viewHeader" v-if="title">
+        <b-container>
+          <h4>{{ title }}</h4>
+        </b-container>
+      </div>
       <b-container class="py-3">
-        <div class="bg-white rounded p-3 mb-3" v-if="title">
-          <h3>{{ title }}</h3>
-        </div>
         <router-view/>
       </b-container>
     </div>
@@ -137,6 +139,7 @@ export default {
     margin: 0;
     padding: 0;
     z-index: 1001;
+    border-bottom: 1px solid #f0f0f0;
     background-color: #fff;
   }
 
@@ -161,6 +164,7 @@ export default {
   }
 
   .sideBar {
+    border-right: 1px solid #f0f0f0;
     background-color: white;
     max-width: 240px;
     height: 100vh;
@@ -201,6 +205,28 @@ export default {
     background-color: #f0f0f0;
     min-height: 100vh;
     padding-top: 40px;
+
+    .viewHeader {
+      position: fixed;
+      top: 0;
+      left: 40px;
+      z-index: 1001;
+      height: 40px;
+      width: calc(100% - 40px);
+      padding: 0 25px 0 5px;
+      background-color: white;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+
+      h4 {
+        line-height: 40px;
+        font-size: 14pt;
+        text-transform: uppercase;
+        margin-left: -20px;
+        margin-right: -20px;
+        margin-bottom: 0;
+      }
+    }
   }
 
   @media screen and (min-width: 960px) {
@@ -215,6 +241,23 @@ export default {
     .mainView {
       margin-left: 240px;
       padding-top: 0;
+
+      .viewHeader {
+        position: static;
+        z-index: 1001;
+        height: 60px;
+        width: 100%;
+        background-color: white;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+
+        h4 {
+          line-height: 60px;
+          font-size: 18pt;
+          text-transform: none;
+          margin: 0;
+        }
+      }
     }
   }
 }
