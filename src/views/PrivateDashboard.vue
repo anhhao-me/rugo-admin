@@ -3,12 +3,12 @@
     <b-col cols="12" lg="8">
       <div class="modelList">
         <b-row class="px-2">
-          <b-col 
+          <b-col
             v-for="model in models"
-            :key="model.name" 
-            class="px-2 pb-3" 
-            cols="6" 
-            md="4" 
+            :key="model.name"
+            class="px-2 pb-3"
+            cols="6"
+            md="4"
             xl="3"
           >
             <router-link  :to="`/private/models/${model.name}`" class="item rounded w-100 h-100 p-3 d-block">
@@ -20,13 +20,18 @@
         </b-row>
       </div>
     </b-col>
-    <!-- <b-col cols="12" lg="4">
-      <div class="utils bg-white rounded mb-3 pt-3 pl-3 pr-3 pb-2">
-        <b-button class="d-block mb-2 w-100 text-left text-white" size="sm" variant="primary" v-for="item in utils" :key="item.label">
+    <b-col cols="12" lg="4">
+      <b-list-group class="utils bg-white rounded mb-3">
+        <b-list-group-item button v-for="item in utils" :key="item.label" @click="doUtil(item)">
           {{ item.label }}
+        </b-list-group-item>
+      </b-list-group>
+      <!-- <div class="utils bg-white rounded mb-3 pt-3 pl-3 pr-3 pb-2">
+        <b-button class="d-block mb-2 w-100 text-left" size="sm" variant="none" >
+
         </b-button>
-      </div>
-    </b-col> -->
+      </div> -->
+    </b-col>
   </b-row>
 </template>
 
@@ -40,6 +45,10 @@ export default {
   },
   methods: {
     ...mapMutations(['setTitle']),
+    ...mapMutations('notice', {
+      pushNotice: 'push'
+    }),
+
     getTotalSize(model){
       if (!model.stats)
         return 0;
@@ -55,6 +64,14 @@ export default {
 
     byteText(size){
       return bytes(size);
+    },
+
+    async doUtil(item){
+      const res = await this.$api.httpGet(item.path)
+      if (res.ok)
+        this.pushNotice({ text: 'Đã thực hiện tác vụ', type: 'success' });
+      else
+        this.pushNotice({ text: res.error || 'Đã xảy ra lỗi', type: 'danger' });
     }
   },
   mounted(){
