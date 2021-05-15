@@ -1,7 +1,7 @@
 <template>
   <div class="DataTable">
     <b-form-group>
-      <b-button variant="primary" v-b-modal.createEditForm class="mr-2">
+      <b-button variant="primary" @click="showCreate" class="mr-2">
         <i class="icon-doc"></i>
       </b-button>
       <b-button variant="danger" class="mr-2" v-if="selected.length > 0" @click="doRemove">
@@ -17,16 +17,15 @@
       </b-dropdown>
     </b-form-group>
     <!-- CREATE FORM MODAL -->
-    <b-modal 
-      id="createEditForm" 
-      hide-footer 
-      :title="mode === 'create' ? 'Tạo mới' : 'Chỉnh sửa'" 
-      @hide="dataForm = {}; mode = 'create'" 
+    <b-modal
+      id="createEditForm"
+      hide-footer
+      :title="mode === 'create' ? 'Tạo mới' : 'Chỉnh sửa'"
       v-if="schema"
       size="lg"
     >
       <b-form @submit.prevent="doHandleDataForm">
-        <DataForm :schema="schema" v-model="dataForm"/>     
+        <DataForm :schema="schema" v-model="dataForm"/>
         <b-form-group>
           <b-button type="submit" variant="primary">{{ mode === 'create'? 'Tạo' : 'Sửa' }}</b-button>
         </b-form-group>
@@ -34,15 +33,15 @@
     </b-modal>
     <!-- END CREATE FORM MODAL -->
 
-    <DataTable 
-      :value="data.data" 
+    <DataTable
+      :value="data.data"
       v-if="data && data.data"
       :schema="viewSchema"
       :fields="displayFields"
       @select="selected = $event"
       @edit="showEdit"
     />
-    
+
     <b-pagination
       class="mt-3"
       v-if="data"
@@ -102,8 +101,10 @@ export default {
 
     async doHandleDataForm(){
       const res = this.mode === 'create' ? await this.doCreate() : await this.doPatch();
-      
+
       if (res){
+        this.formData = {};
+
         this.$bvModal.hide("createEditForm");
         this.$emit('list', {
           $sort: { createdAt: -1 }
@@ -118,7 +119,7 @@ export default {
     doPatch(){
       for (let key in this.dataForm){
         if (
-          this.viewSchema[key] 
+          this.viewSchema[key]
           && this.viewSchema[key].type.toLowerCase() === 'password' && this.dataForm[key] === ''
         ){
           delete this.dataForm[key];
@@ -133,7 +134,7 @@ export default {
           continue;
         }
       }
-      
+
       const id = this.dataForm._id;
       delete this.dataForm._id;
 
@@ -152,6 +153,15 @@ export default {
       }
     },
 
+    showCreate(){
+      if (this.mode === 'edit'){
+        this.dataForm = {};
+      }
+
+      this.mode = 'create';
+      this.$bvModal.show('createEditForm');
+    },
+
     showEdit(item){
       this.originForm = JSON.parse(JSON.stringify(item));
       this.dataForm = JSON.parse(JSON.stringify(item));
@@ -163,7 +173,7 @@ export default {
           delete this.dataForm[key];
           continue;
         }
-        
+
         if (this.viewSchema[key].type.toLowerCase() === 'password'){
           delete this.dataForm[key];
           continue;
